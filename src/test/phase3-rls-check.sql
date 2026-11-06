@@ -57,7 +57,7 @@ begin
   -- ===== Worker with materials permission =====
   perform set_config('request.jwt.claims', json_build_object('sub', wp, 'role', 'authenticated')::text, true);
   execute 'set local role authenticated';
-  select count(*) into n from public.materials where company_id = ca; out := out || format('trabajador CON permiso ve materiales A: %s (esperado 1)|', n);
+  select count(*) into n from public.materials where company_id = ca; out := out || format('trabajador CON permiso ve materiales A: %s (esperado: existentes + 1)|', n);
   select count(*) into n from public.materials where company_id = cb; out := out || format('trabajador CON permiso ve materiales B: %s (esperado 0)|', n);
   select count(*) into n from public.payments; out := out || format('trabajador CON permiso ve pagos: %s (esperado 0)|', n);
   select count(*) into n from public.clients; out := out || format('trabajador CON permiso ve clientes: %s (esperado 0)|', n);
