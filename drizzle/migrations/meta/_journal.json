@@ -43,6 +43,13 @@
       "when": 1793923741311,
       "tag": "0005_phase3_materials_payments_receipts",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793927059059,
+      "tag": "0006_document_dev_database_bootstrap",
+      "breakpoints": true
     }
   ]
 }
