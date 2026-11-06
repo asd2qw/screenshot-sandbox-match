@@ -25,6 +25,7 @@ export const Route = createFileRoute("/_authenticated/pagos")({
   component: () => <OwnerOnly><Pagos /></OwnerOnly>,
 });
 
+const sel = "h-9 w-full rounded-md border bg-background px-3 text-sm";
 const METHODS: Record<string, string> = { transfer: "Transferencia", cash: "Efectivo", card: "Tarjeta", bizum: "Bizum", check: "Cheque", other: "Otro" };
 
 type Payment = {
@@ -193,7 +194,6 @@ function PaymentDialog({ payment, quotes, clients, works, onClose }: {
     qc.invalidateQueries({ queryKey: ["payments"] });
     onClose();
   }
-  const sel = "h-9 w-full rounded-md border bg-background px-3 text-sm";
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[90vh] overflow-y-auto">
