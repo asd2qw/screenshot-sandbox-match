@@ -12,5 +12,6 @@
 - [x] Phase 3: Presupuestos.
 - [x] Phase 3: Gastos.
 - [x] Phase 0 (dev copy): code copied, migrations 0000–0005 applied to new dev database, receipts bucket.
-- [ ] Phase 1: Pagos filters + verify Materiales as owner and worker (awaiting approval).
+- [x] Phase 1: Pagos filters + Materiales/RLS verification.
+- [ ] Phase 2: Finanzas (awaiting user approval).
 - [x] Update HANDOFF.md with full status for another AI.

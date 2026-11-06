@@ -20,3 +20,8 @@
 - 0006: solo comentario de documentación (no cambia el esquema).
 - Bucket privado `receipts` (10 MB) creado; lo exigían las políticas de 0005 y no existía.
 - Inicio de sesión por correo activado. Pruebas: 24/24 superadas.
+
+## 06/11/2026 — Fase 1 (Pagos y Materiales)
+- Pagos: filtros por cliente, obra y rango de fechas (inclusivo). "Cobrado" suma solo los pagos filtrados; "Pendiente" usa los presupuestos del cliente/obra filtrados y los pagos hasta la fecha «Hasta». Aviso si «Desde» > «Hasta». Reglas en `payment-rules.ts` con pruebas en `payment-filters.test.ts`.
+- Materiales: corregido un error de tipos en el diálogo de movimientos.
+- Seguridad verificada con `src/test/phase3-rls-check.sql` (se ejecuta y se deshace solo): aislamiento entre empresas, trabajador con/sin permiso, trabajador desactivado, anónimo, stock (entradas, salidas, sin stock negativo). Todo correcto.

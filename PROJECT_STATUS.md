@@ -18,3 +18,8 @@
 
 ## Arquitectura
 TanStack Start (React 19) + Tailwind v4 + Lovable Cloud. Operaciones privilegiadas en funciones de servidor con verificación de rol.
+
+## Fase 1 de la copia de desarrollo (06/11/2026) — terminada
+- Pagos con filtros por cliente, obra y fechas; totales filtrados.
+- Materiales y seguridad (RLS, aislamiento entre empresas, permisos de trabajador) verificados en base de datos.
+- Sin verificar en pantalla con una cuenta real de trabajador (solo comprobado a nivel de base de datos).
