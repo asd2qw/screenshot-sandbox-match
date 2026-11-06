@@ -18,13 +18,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { formatDate, formatEUR } from "@/lib/format";
 import { quoteTotals } from "@/lib/quote-rules";
-import { balance, sumPaid } from "@/lib/payment-rules";
+import { balance, sumPaid, filterPayments, filterQuotes, paymentsForBalance, EMPTY_PAYMENT_FILTERS, type PaymentFilters } from "@/lib/payment-rules";
 
 export const Route = createFileRoute("/_authenticated/pagos")({
   head: () => pageHead("Pagos", "Cobros de clientes por presupuesto y obra, con saldo pendiente."),
   component: () => <OwnerOnly><Pagos /></OwnerOnly>,
 });
 
+const sel = "h-9 w-full rounded-md border bg-background px-3 text-sm";
 const METHODS: Record<string, string> = { transfer: "Transferencia", cash: "Efectivo", card: "Tarjeta", bizum: "Bizum", check: "Cheque", other: "Otro" };
 
 type Payment = {
@@ -37,6 +38,7 @@ function Pagos() {
   const qc = useQueryClient();
   const [editing, setEditing] = useState<Partial<Payment> | null>(null);
   const [deleting, setDeleting] = useState<Payment | null>(null);
+  const [filters, setFilters] = useState<PaymentFilters>(EMPTY_PAYMENT_FILTERS);
 
   const { data: payments = [], isLoading } = useQuery({
     queryKey: ["payments"],
@@ -56,9 +58,12 @@ function Pagos() {
   const workName = (id: string | null) => works.find((w) => w.id === id)?.name;
   const quoteOf = (id: string | null) => quotes.find((q) => q.id === id);
 
-  const tracked = quotes.filter((q) => q.status === "accepted" || payments.some((p) => p.quote_id === q.id));
-  const totalPaid = sumPaid(payments);
-  const totalPending = tracked.reduce((s, q) => s + balance(quoteTotals(q.quote_items, q.vat_rate).total, sumPaid(payments.filter((p) => p.quote_id === q.id))).pending, 0);
+  const shown = filterPayments(payments, filters);
+  const tracked = filterQuotes(quotes, filters).filter((q) => q.status === "accepted" || payments.some((p) => p.quote_id === q.id));
+  const paidFor = (qid: string) => sumPaid(paymentsForBalance(payments, qid, filters));
+  const totalPaid = sumPaid(shown);
+  const totalPending = tracked.reduce((s, q) => s + balance(quoteTotals(q.quote_items, q.vat_rate).total, paidFor(q.id)).pending, 0);
+  const filtered = filters.clientId || filters.workId || filters.from || filters.to;
 
   async function confirmDelete() {
     if (!deleting) return;
@@ -72,9 +77,23 @@ function Pagos() {
     <div>
       <PageHeader title="Pagos" description="Cobros de clientes"
         actions={<Button onClick={() => setEditing({ payment_date: new Date().toISOString().slice(0, 10), method: "transfer" })}><Plus className="size-4" /> Registrar pago</Button>} />
+      <div className="mb-4 grid gap-3 rounded-lg border bg-card p-3 shadow-card sm:grid-cols-2 lg:grid-cols-5">
+        <div><Label htmlFor="f-client">Cliente</Label>
+          <select id="f-client" className={sel} value={filters.clientId} onChange={(e) => setFilters({ ...filters, clientId: e.target.value })}>
+            <option value="">Todos</option>{clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select></div>
+        <div><Label htmlFor="f-work">Obra</Label>
+          <select id="f-work" className={sel} value={filters.workId} onChange={(e) => setFilters({ ...filters, workId: e.target.value })}>
+            <option value="">Todas</option>{works.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
+          </select></div>
+        <div><Label htmlFor="f-from">Desde</Label><Input id="f-from" type="date" value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })} /></div>
+        <div><Label htmlFor="f-to">Hasta</Label><Input id="f-to" type="date" value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })} /></div>
+        <div className="flex items-end"><Button variant="outline" className="w-full" disabled={!filtered} onClick={() => setFilters(EMPTY_PAYMENT_FILTERS)}>Quitar filtros</Button></div>
+        {filters.from && filters.to && filters.from > filters.to && <p className="text-sm text-destructive sm:col-span-2 lg:col-span-5">La fecha «Desde» es posterior a «Hasta».</p>}
+      </div>
       <div className="mb-6 grid gap-3 sm:grid-cols-2">
         <div className="rounded-lg border bg-card p-4 shadow-card"><p className="text-sm text-muted-foreground">Cobrado</p><p className="font-display text-2xl font-bold">{formatEUR(totalPaid)}</p></div>
-        <div className="rounded-lg border bg-card p-4 shadow-card"><p className="text-sm text-muted-foreground">Pendiente de presupuestos aceptados</p><p className="font-display text-2xl font-bold text-primary">{formatEUR(totalPending)}</p></div>
+        <div className="rounded-lg border bg-card p-4 shadow-card"><p className="text-sm text-muted-foreground">Pendiente de presupuestos aceptados{filters.to ? ` (a ${formatDate(filters.to)})` : ""}</p><p className="font-display text-2xl font-bold text-primary">{formatEUR(totalPending)}</p></div>
       </div>
 
       <h2 className="mb-2 font-semibold">Saldo por presupuesto</h2>
@@ -84,7 +103,7 @@ function Pagos() {
         <div className="mb-6 space-y-2">
           {tracked.map((q) => {
             const total = quoteTotals(q.quote_items, q.vat_rate).total;
-            const b = balance(total, sumPaid(payments.filter((p) => p.quote_id === q.id)));
+            const b = balance(total, paidFor(q.id));
             const pct = total > 0 ? Math.min(100, (b.paid / total) * 100) : 0;
             return (
               <div key={q.id} className="rounded-lg border bg-card p-3 shadow-card">
@@ -106,11 +125,11 @@ function Pagos() {
       )}
 
       <h2 className="mb-2 font-semibold">Pagos registrados</h2>
-      {isLoading ? <p className="text-sm text-muted-foreground">Cargando…</p> : payments.length === 0 ? (
-        <div className="rounded-lg border bg-card px-6 py-12 text-center text-sm text-muted-foreground">Todavía no hay pagos.</div>
+      {isLoading ? <p className="text-sm text-muted-foreground">Cargando…</p> : shown.length === 0 ? (
+        <div className="rounded-lg border bg-card px-6 py-12 text-center text-sm text-muted-foreground">{payments.length === 0 ? "Todavía no hay pagos." : "Ningún pago coincide con los filtros."}</div>
       ) : (
         <div className="space-y-2">
-          {payments.map((p) => (
+          {shown.map((p) => (
             <div key={p.id} className="flex flex-wrap items-center gap-3 rounded-lg border bg-card p-3 shadow-card">
               <div className="min-w-0 flex-1">
                 <p className="truncate font-semibold">{clientName(p.client_id) ?? "Sin cliente"}{quoteOf(p.quote_id) ? ` · ${quoteOf(p.quote_id)!.number}` : ""}</p>
@@ -175,7 +194,6 @@ function PaymentDialog({ payment, quotes, clients, works, onClose }: {
     qc.invalidateQueries({ queryKey: ["payments"] });
     onClose();
   }
-  const sel = "h-9 w-full rounded-md border bg-background px-3 text-sm";
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[90vh] overflow-y-auto">

@@ -192,7 +192,7 @@ function MaterialDialog({ material, onClose, onSaved }: { material: Partial<Mate
 }
 
 function MovementDialog({ kind, materialId, materials, stock, works, onClose, onSaved }: {
-  kind: "in" | "out"; materialId?: string; materials: Material[]; stock: Record<string, number>;
+  kind: "in" | "out"; materialId?: string | undefined; materials: Material[]; stock: Record<string, number>;
   works: { id: string; name: string }[]; onClose: () => void; onSaved: () => void;
 }) {
   const { data: user } = useCurrentUser();
