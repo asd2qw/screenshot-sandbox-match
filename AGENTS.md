@@ -7,24 +7,17 @@
 >
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
-
-## What Lovable manages
-
-Rules outside this block are the project's own. Change the pieces below in
-Lovable, not by hand. With the [Lovable MCP](https://mcp.lovable.dev)
-connected, `send_message` asks Lovable to do it; otherwise ask the user to
-use the editor.
-
-- **Database.** Do not add or edit `supabase/migrations/` or `drizzle/`.
-  Ask Lovable to change the schema.
-- **Generated files.** Do not edit a file whose header says it is automatically
-  generated.
-- **AI gateway.** Keep model calls on Lovable's gateway, and keep
-  `LOVABLE_API_KEY` out of browser code.
-- **Connectors.** Lovable provides native connectors. `list_connectors` shows
-  which are enabled; `add_connector` only returns the dashboard link. When a
-  connector is enabled, calls go through the connector gateway and need
-  `LOVABLE_API_KEY`. When Lovable does not provide one, users can bring their
-  own key and store it in Secrets.
-- **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+- Backend is Lovable Cloud only (DB, auth, storage); no other database or auth services — single coherent stack.
+- Every business table carries `company_id` and RLS scoped via `current_company_id()` / `is_company_owner()` — keeps tenants isolated for future multi-company use.
+- Roles live in `user_roles` (owner/worker), never on profiles — prevents privilege escalation.
+- Worker accounts are created only via server functions in `src/lib/workers.functions.ts` with `app_metadata.company_id`; public signup only works for the very first owner (DB trigger) — workers cannot self-register.
+- Business limits live in pure modules (`src/lib/*-rules.ts`) with tests in `src/test/` and are also enforced in the DB.
+- UI copy is Spanish; dates via `src/lib/format.ts` (DD/MM/YYYY, Europe/Madrid, EUR).
+- Unfinished modules render `ComingSoon`; never fake functionality.
+- Keep PROJECT_STATUS.md, DATABASE.md, CHANGELOG.md updated at the end of each phase.
+- Phase 2 review SQL lives outside active migrations in `docs/phase2/`; apply only through the managed migration tool after separate SQL approval, so draft review never changes the hosted schema.
+- Phase 2 uses tenant-scoped assignment tables for multiple workers; cascade assignment rows on profile deletion and retain plain creator UUIDs, so deleting accounts cannot invoke protected parent-row updates or erase business history.
+- Worker access changes use `worker-access.ts` with fail-closed ordering and checked writes; no success is returned after partial failure.

@@ -1,0 +1,1 @@
+comment on function public.current_company_id() is 'Empresa del usuario autenticado; base del aislamiento por company_id.';

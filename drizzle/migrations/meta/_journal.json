@@ -1,0 +1,55 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1793058632756,
+      "tag": "0000_migration",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793566468925,
+      "tag": "0001_phase2_business_modules",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793566566946,
+      "tag": "0002_phase2_remove_inherited_anonymous_grants",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793752156065,
+      "tag": "0003_phase3_quotes",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793837055812,
+      "tag": "0004_phase3_expenses",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793923741311,
+      "tag": "0005_phase3_materials_payments_receipts",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793927059059,
+      "tag": "0006_document_dev_database_bootstrap",
+      "breakpoints": true
+    }
+  ]
+}
