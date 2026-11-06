@@ -8,8 +8,7 @@ declare
   ca uuid; cb uuid; owner_a uuid; owner_b uuid := gen_random_uuid();
   wp uuid := gen_random_uuid(); wn uuid := gen_random_uuid();
   wa uuid; wb uuid; ma uuid; mb uuid; cla uuid; clb uuid;
-  out text := ''; n int; ok boolean; st numeric;
-  procedure_as text;
+   out text := ''; n int; st numeric;
 begin
   select p.id, p.company_id into owner_a, ca from public.profiles p join public.user_roles r on r.user_id = p.id and r.role = 'owner' limit 1;
   if owner_a is null then raise exception 'No hay propietario'; end if;
