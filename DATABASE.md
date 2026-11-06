@@ -29,3 +29,6 @@
 ## Fase 3
 - `quotes` (presupuestos: número único por empresa, cliente/obra opcionales, estado, IVA) y `quote_items` (partidas). Solo propietario activo.
 - `expenses` (gastos: fecha, categoría, importe, obra opcional, proveedor). Propietario: todo; trabajador con permiso: crea y lee los suyos.
+
+## Base de desarrollo (06/11/2026)
+- Aplicadas y verificadas: 0000–0005 y 0006 (comentario). Bucket `receipts` privado creado con la herramienta de almacenamiento (no por SQL).

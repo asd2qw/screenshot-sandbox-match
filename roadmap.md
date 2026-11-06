@@ -11,5 +11,6 @@
 - [x] Phase 2 UI: Obras, Trabajos, Calendario screens.
 - [x] Phase 3: Presupuestos.
 - [x] Phase 3: Gastos.
-- [ ] Phase 3: Materiales/almacén, Pagos.
+- [x] Phase 0 (dev copy): code copied, migrations 0000–0005 applied to new dev database, receipts bucket.
+- [ ] Phase 1: Pagos filters + verify Materiales as owner and worker (awaiting approval).
 - [x] Update HANDOFF.md with full status for another AI.
