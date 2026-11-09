@@ -1,0 +1,8 @@
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { type FinanceFilters } from '@/lib/finance-rules';
+export const emptyFinanceFilters:FinanceFilters={clientId:'',workId:'',from:'',to:''};
+export function FinanceFiltersBar({filters:f,onChange,clients,works}:{filters:FinanceFilters;onChange:(f:FinanceFilters)=>void;clients:{id:string;name:string}[];works:{id:string;name:string}[]}){
+ const sel='h-9 w-full rounded-md border bg-background px-3 text-sm';return <div className="mb-6 grid gap-3 border-b pb-5 sm:grid-cols-2 lg:grid-cols-5"><div><Label htmlFor="ff-client">Cliente</Label><select id="ff-client" className={sel} value={f.clientId} onChange={e=>onChange({...f,clientId:e.target.value})}><option value="">Todos</option>{clients.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></div><div><Label htmlFor="ff-work">Obra</Label><select id="ff-work" className={sel} value={f.workId} onChange={e=>onChange({...f,workId:e.target.value})}><option value="">Todas</option>{works.map(w=><option key={w.id} value={w.id}>{w.name}</option>)}</select></div><div><Label htmlFor="ff-from">Desde</Label><Input id="ff-from" type="date" value={f.from} onChange={e=>onChange({...f,from:e.target.value})}/></div><div><Label htmlFor="ff-to">Hasta</Label><Input id="ff-to" type="date" value={f.to} onChange={e=>onChange({...f,to:e.target.value})}/></div><Button variant="outline" className="self-end" onClick={()=>onChange(emptyFinanceFilters)}>Quitar filtros</Button>{f.from&&f.to&&f.from>f.to&&<p className="text-sm text-destructive sm:col-span-2 lg:col-span-5">La fecha «Desde» es posterior a «Hasta».</p>}</div>;
+}

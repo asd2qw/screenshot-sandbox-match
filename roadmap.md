@@ -13,5 +13,7 @@
 - [x] Phase 3: Gastos.
 - [x] Phase 0 (dev copy): code copied, migrations 0000–0005 applied to new dev database, receipts bucket.
 - [x] Phase 1: Pagos filters + Materiales/RLS verification.
-- [ ] Phase 2: Finanzas (awaiting user approval).
+- [ ] Finanzas: owner-only cash summary, date/client/work filters and outstanding balances.
+- [ ] Facturas: drafts, quote conversion, issue/cancel, sequential numbering and PDF.
+- [ ] Verify invoice rules, tenant isolation and signed-in owner flows; update documentation.
 - [x] Update HANDOFF.md with full status for another AI.

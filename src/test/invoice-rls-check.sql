@@ -1,0 +1,33 @@
+DO $$
+DECLARE ca uuid; cb uuid; owner_a uuid; worker uuid:=gen_random_uuid(); client_a uuid; client_b uuid; invoice_a uuid; invoice_b uuid; n int; num text; blocked boolean;
+BEGIN
+ SELECT p.id,p.company_id INTO owner_a,ca FROM public.profiles p JOIN public.user_roles r ON r.user_id=p.id AND r.role='owner' LIMIT 1;
+ IF owner_a IS NULL THEN RAISE EXCEPTION 'No owner'; END IF;
+ INSERT INTO public.companies(name,tax_id,address) VALUES('Invoice test B','TEST','Test address') RETURNING id INTO cb;
+ INSERT INTO public.clients(company_id,name,tax_id,address) VALUES(ca,'Invoice test A','TEST','Test address') RETURNING id INTO client_a;
+ INSERT INTO public.clients(company_id,name,tax_id,address) VALUES(cb,'Invoice test B','TEST','Test address') RETURNING id INTO client_b;
+ INSERT INTO public.invoices(company_id,client_id,title,created_by,items) VALUES(cb,client_b,'Other company',owner_a,'[{"description":"Test","unit":"ud","quantity":1,"unit_price":100}]') RETURNING id INTO invoice_b;
+ INSERT INTO auth.users(id,instance_id,aud,role,email,raw_app_meta_data,raw_user_meta_data) VALUES(worker,'00000000-0000-0000-0000-000000000000','authenticated','authenticated','invoice-worker@test.invalid',jsonb_build_object('company_id',ca),'{}');
+ UPDATE public.companies SET tax_id='TEST',address='Test address' WHERE id=ca;
+ PERFORM set_config('request.jwt.claims',json_build_object('sub',owner_a,'role','authenticated')::text,true); EXECUTE 'set local role authenticated';
+ SELECT count(*) INTO n FROM public.invoices WHERE company_id=cb; IF n<>0 THEN RAISE EXCEPTION 'FAIL tenant read'; END IF;
+ blocked=false; BEGIN INSERT INTO public.invoices(company_id,client_id,title,items) VALUES(cb,client_b,'Forbidden','[{"description":"Test","unit":"ud","quantity":1,"unit_price":100}]'); EXCEPTION WHEN OTHERS THEN blocked=true; END; IF NOT blocked THEN RAISE EXCEPTION 'FAIL tenant insert'; END IF;
+ blocked=false; BEGIN INSERT INTO public.invoices(company_id,client_id,title,items) VALUES(ca,client_b,'Cross client','[{"description":"Test","unit":"ud","quantity":1,"unit_price":100}]'); EXCEPTION WHEN OTHERS THEN blocked=true; END; IF NOT blocked THEN RAISE EXCEPTION 'FAIL cross client'; END IF;
+ INSERT INTO public.invoices(company_id,client_id,title,items) VALUES(ca,client_a,'Valid draft','[{"description":"Test","unit":"ud","quantity":1,"unit_price":100}]') RETURNING id INTO invoice_a;
+ UPDATE public.invoices SET status='issued' WHERE id=invoice_a RETURNING number INTO num; IF num IS NULL THEN RAISE EXCEPTION 'FAIL number'; END IF;
+ blocked=false; BEGIN UPDATE public.invoices SET title='Changed' WHERE id=invoice_a; EXCEPTION WHEN OTHERS THEN blocked=true; END; IF NOT blocked THEN RAISE EXCEPTION 'FAIL immutable'; END IF;
+ blocked=false; BEGIN DELETE FROM public.invoices WHERE id=invoice_a; EXCEPTION WHEN OTHERS THEN blocked=true; END; IF NOT blocked THEN RAISE EXCEPTION 'FAIL issued delete'; END IF;
+ INSERT INTO public.payments(company_id,client_id,invoice_id,amount) VALUES(ca,client_a,invoice_a,40);
+ blocked=false; BEGIN UPDATE public.invoices SET status='cancelled' WHERE id=invoice_a; EXCEPTION WHEN OTHERS THEN blocked=true; END; IF NOT blocked THEN RAISE EXCEPTION 'FAIL paid cancel'; END IF;
+ DELETE FROM public.payments WHERE invoice_id=invoice_a;
+ UPDATE public.invoices SET status='cancelled' WHERE id=invoice_a;
+ EXECUTE 'reset role';
+ PERFORM set_config('request.jwt.claims',json_build_object('sub',worker,'role','authenticated')::text,true); EXECUTE 'set local role authenticated';
+ SELECT count(*) INTO n FROM public.invoices; IF n<>0 THEN RAISE EXCEPTION 'FAIL worker read'; END IF;
+ blocked=false; BEGIN INSERT INTO public.invoices(company_id,client_id,title,items) VALUES(ca,client_a,'Forbidden worker','[{"description":"Test","unit":"ud","quantity":1,"unit_price":100}]'); EXCEPTION WHEN OTHERS THEN blocked=true; END; IF NOT blocked THEN RAISE EXCEPTION 'FAIL worker insert'; END IF;
+ EXECUTE 'reset role';
+ PERFORM set_config('request.jwt.claims','{"role":"anon"}',true);EXECUTE 'set local role anon';blocked=false;
+ BEGIN SELECT count(*) INTO n FROM public.invoices; IF n<>0 THEN RAISE EXCEPTION 'FAIL anon rows'; END IF; EXCEPTION WHEN insufficient_privilege THEN blocked=true; END;
+ EXECUTE 'reset role';
+ RAISE EXCEPTION 'INVOICE_TESTS_OK: tenant isolation, worker/anon denied, tenant links, issue numbering, immutability, paid cancellation guard. All changes rolled back.';
+END $$;
