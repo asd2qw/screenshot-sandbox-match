@@ -12,8 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { invoiceSchema, type InvoiceDraft, type Invoice } from '@/lib/invoice-rules';
 import { quoteTotals } from '@/lib/quote-rules';
 import { formatEUR } from '@/lib/format';
-import { financeDataQuery } from '@/lib/finance-data';
-type Data = Awaited<ReturnType<NonNullable<typeof financeDataQuery.queryFn>>>;
+import { type FinanceData as Data } from '@/lib/finance-data';
 export function InvoiceEditor({ draft, data, onClose }: { draft: InvoiceDraft & { id?: string }; data: Data; onClose: () => void }) {
  const [f,setF]=useState(draft); const [saving,setSaving]=useState(false); const {data:user}=useCurrentUser(); const qc=useQueryClient();
  const set=(patch:Partial<InvoiceDraft>)=>setF({...f,...patch});
