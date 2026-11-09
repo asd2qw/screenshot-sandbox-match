@@ -344,6 +344,104 @@ export type Database = {
           },
         ]
       }
+      invoices: {
+        Row: {
+          client_id: string
+          company_id: string
+          created_at: string
+          created_by: string
+          due_date: string | null
+          fiscal_year: number | null
+          id: string
+          issue_date: string
+          issuer: Json | null
+          items: Json
+          notes: string | null
+          number: string | null
+          quote_id: string | null
+          recipient: Json | null
+          sequence: number | null
+          status: string
+          title: string
+          updated_at: string
+          vat_rate: number
+          work_id: string | null
+        }
+        Insert: {
+          client_id: string
+          company_id: string
+          created_at?: string
+          created_by?: string
+          due_date?: string | null
+          fiscal_year?: number | null
+          id?: string
+          issue_date?: string
+          issuer?: Json | null
+          items?: Json
+          notes?: string | null
+          number?: string | null
+          quote_id?: string | null
+          recipient?: Json | null
+          sequence?: number | null
+          status?: string
+          title?: string
+          updated_at?: string
+          vat_rate?: number
+          work_id?: string | null
+        }
+        Update: {
+          client_id?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          due_date?: string | null
+          fiscal_year?: number | null
+          id?: string
+          issue_date?: string
+          issuer?: Json | null
+          items?: Json
+          notes?: string | null
+          number?: string | null
+          quote_id?: string | null
+          recipient?: Json | null
+          sequence?: number | null
+          status?: string
+          title?: string
+          updated_at?: string
+          vat_rate?: number
+          work_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_company_id_client_id_fkey"
+            columns: ["company_id", "client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["company_id", "id"]
+          },
+          {
+            foreignKeyName: "invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_company_id_quote_id_fkey"
+            columns: ["company_id", "quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["company_id", "id"]
+          },
+          {
+            foreignKeyName: "invoices_company_id_work_id_fkey"
+            columns: ["company_id", "work_id"]
+            isOneToOne: false
+            referencedRelation: "works"
+            referencedColumns: ["company_id", "id"]
+          },
+        ]
+      }
       materials: {
         Row: {
           active: boolean
@@ -399,6 +497,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          invoice_id: string | null
           method: string
           notes: string | null
           payment_date: string
@@ -414,6 +513,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          invoice_id?: string | null
           method?: string
           notes?: string | null
           payment_date?: string
@@ -429,6 +529,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          invoice_id?: string | null
           method?: string
           notes?: string | null
           payment_date?: string
@@ -464,6 +565,13 @@ export type Database = {
             columns: ["company_id", "work_id"]
             isOneToOne: false
             referencedRelation: "works"
+            referencedColumns: ["company_id", "id"]
+          },
+          {
+            foreignKeyName: "payments_invoice_tenant"
+            columns: ["company_id", "invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
             referencedColumns: ["company_id", "id"]
           },
         ]
