@@ -32,3 +32,9 @@
 
 ## Base de desarrollo (06/11/2026)
 - Aplicadas y verificadas: 0000–0005 y 0006 (comentario). Bucket `receipts` privado creado con la herramienta de almacenamiento (no por SQL).
+
+## Facturas (0007)
+- `invoices`: cliente obligatorio, obra/presupuesto opcionales (misma empresa y mismo cliente), partidas en JSON, estado `draft|issued|cancelled`. Solo propietario activo (RLS).
+- Trigger `invoices_guard`: valida partidas y fechas; al emitir asigna `sequence`/`number` por empresa y año y congela emisor/cliente (`issuer`, `recipient`); emitida = inmutable; solo se borran borradores; anular solo si no hay cobros vinculados. Un presupuesto solo puede tener una factura no anulada.
+- `payments.invoice_id` (opcional) + trigger `payment_invoice_guard`: el cobro debe coincidir con cliente/obra/presupuesto de una factura emitida.
+- Prueba de seguridad: `src/test/invoice-rls-check.sql` (se deshace sola).
