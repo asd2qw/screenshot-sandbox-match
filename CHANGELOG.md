@@ -25,3 +25,8 @@
 - Pagos: filtros por cliente, obra y rango de fechas (inclusivo). "Cobrado" suma solo los pagos filtrados; "Pendiente" usa los presupuestos del cliente/obra filtrados y los pagos hasta la fecha «Hasta». Aviso si «Desde» > «Hasta». Reglas en `payment-rules.ts` con pruebas en `payment-filters.test.ts`.
 - Materiales: corregido un error de tipos en el diálogo de movimientos.
 - Seguridad verificada con `src/test/phase3-rls-check.sql` (se ejecuta y se deshace solo): aislamiento entre empresas, trabajador con/sin permiso, trabajador desactivado, anónimo, stock (entradas, salidas, sin stock negativo). Todo correcto.
+
+## 09/11/2026 — Finanzas y Facturas
+- Finanzas: resumen de caja con filtros, evolución mensual, pendientes y gastos por categoría.
+- Facturas: borradores, conversión desde presupuesto, emisión con numeración correlativa, anulación, cobros vinculados, vista previa y PDF.
+- Base de datos: tabla `invoices` y enlace `payments.invoice_id` con reglas en triggers. Pruebas: 34/34 y comprobación SQL de aislamiento y permisos superada.

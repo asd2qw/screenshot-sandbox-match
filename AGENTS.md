@@ -20,4 +20,5 @@
 - Keep PROJECT_STATUS.md, DATABASE.md, CHANGELOG.md updated at the end of each phase.
 - Phase 2 review SQL lives outside active migrations in `docs/phase2/`; apply only through the managed migration tool after separate SQL approval, so draft review never changes the hosted schema.
 - Phase 2 uses tenant-scoped assignment tables for multiple workers; cascade assignment rows on profile deletion and retain plain creator UUIDs, so deleting accounts cannot invoke protected parent-row updates or erase business history.
+- Invoice numbering, immutability and fiscal snapshots are enforced by DB triggers on `invoices`; the UI only creates drafts and changes status, so concurrent or direct writes cannot break legal invoice sequences.
 - Worker access changes use `worker-access.ts` with fail-closed ordering and checked writes; no success is returned after partial failure.

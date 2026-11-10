@@ -66,13 +66,15 @@ configuración. Interfaz en español.
 - Gastos (hecho): `expenses`. Propietario ve y edita todo; trabajador con permiso `can_register_expenses` registra y ve solo los suyos (no edita ni borra). Reglas en `src/lib/expense-rules.ts`.
 - Pendiente: Pagos, Materiales, Almacén.
 
-**Siguientes fases:** 4 finanzas, facturas, PDF de presupuestos/facturas; 5 horas, equipos, fotos, notificaciones; 6 PWA, seguridad.
+**Fase 4 (09/11/2026):** Pagos, Materiales, Finanzas y Facturas hechos (`invoice-rules.ts`, `finance-rules.ts`, `invoice-pdf.ts`). Pendiente: PDF de presupuestos.
+
+**Siguientes fases:** 5 horas, equipos, fotos, notificaciones; 6 PWA, seguridad.
 
 **Sin verificar:** flujos reales con una cuenta de trabajador (visibilidad por asignación, cambio de estado, registro de gastos).
 
 ## 7. Cambios en la base de datos
 
-- Migraciones aplicadas en orden en `drizzle/migrations/`: `0000` (fase 1), `0001`–`0002` (fase 2), `0003` (presupuestos), `0004` (gastos).
+- Migraciones aplicadas en orden en `drizzle/migrations/`: `0000` (fase 1), `0001`–`0002` (fase 2), `0003` (presupuestos), `0004` (gastos), `0005` (materiales, pagos, recibos), `0007` (facturas).
 - **No se aplican solas** al sincronizar con Git: en otro backend hay que ejecutarlas en orden.
 - Funciones de acceso: `phase2_active_member`, `phase2_owner`, `phase2_work_visible`, `phase2_task_assigned`, `phase2_event_assigned`, `phase3_can_register_expenses` (security definer). Un trabajador inactivo no tiene acceso a nada.
 - Tablas nuevas: `company_id`, GRANT, RLS y políticas en la misma migración; IDs de usuario como UUID sin FK a `auth.users`.
@@ -86,6 +88,6 @@ separado desde el panel del backend, y aplicar antes el esquema en la base de da
 Los usuarios existentes eligen una contraseña nueva en su primera visita si se migra a otro
 backend.
 
-## 9. Siguiente paso sugerido
+## 9. Siguiente paso sugerido (actualizado 09/11/2026: Pagos, Materiales, Finanzas y Facturas ya están hechos; siguiente: PDF de presupuestos y fase 5)
 
 Fase 3 restante: **Pagos** (cobros de clientes por obra/presupuesto) y **Materiales/Almacén** (catálogo, stock, consumo por obra; trabajador con `can_register_materials`). Seguir el patrón de `gastos.tsx`: migración con RLS, reglas puras en `src/lib/*-rules.ts` con pruebas en `src/test/`, pantalla en español. Después, probar con una cuenta de trabajador real. Actualizar `PROJECT_STATUS.md`, `DATABASE.md`, `CHANGELOG.md` y este archivo al terminar.
